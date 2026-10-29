@@ -3914,7 +3914,7 @@ let jgOn=false;
           q.t=1/1.5;q.left--;
           const r=remotes.get(q.id);
           if(!r||r.dead||!enemy(r))q.left=0;
-          else if(r.bot){botHurt(r,Math.max(1,Math.ceil(r.b.hp*0.2)),myId,'u',true);ringMk(r.g.position,0xff3030);}
+          else if(r.bot){botHurt(r,Math.max(1,Math.ceil(r.b.hp*(r.b.boss?0.005:0.2))),myId,'u',true);ringMk(r.g.position,0xff3030);}
           else{sendNet({uk:++myUk,uy:'dv',ut:q.id,ud:0,ts:TS});ringMk(r.g.position,0xff3030);}
         }
         if(q.left<=0)U.dots.splice(i,1);
@@ -4242,6 +4242,9 @@ let jgOn=false;
     remotes.forEach(r=>{if(!r.mon&&!r.bot&&r.dm===(P.raid&&P.raid.id)&&!r.dead&&!r.stale)a.push({x:r.g.position.x,z:r.g.position.z});});
     return a;
   }
+  // 하드·하드코어: 잡몹 한 대에 받는 피해는 최대 15
+  const MOB_CAP=15;
+  const mobCap=d=>(P.raid&&P.raid.df>=1)?Math.min(MOB_CAP,d):d;
   function monTick(m,dt,t){
     const b=m.b,r=m.r,T=MT[m.type];
     if(b.dead){if(!m.rm)m.rm=P.t+1.6;else if(P.t>m.rm)monRemove(m);return;}
@@ -4280,12 +4283,12 @@ let jgOn=false;
           b.cd=T.cd;r.kick=0.1;
           const hit=Math.random()<0.5;
           addTracer(muzzle(r.g.position,r.g.rotation.y),hit?tg:tg.clone().add(new THREE.Vector3((Math.random()-.5)*8,(Math.random()-.5)*4,(Math.random()-.5)*8)),'a','def');
-          if(hit)takeDamage(Math.round(T.dmg*dm),m.id,'z');
+          if(hit)takeDamage(mobCap(Math.round(T.dmg*dm)),m.id,'z');
         }
       }
     }else if(d<T.rng&&b.cd<=0){
       b.cd=T.cd;r.swing=0.35;
-      if(!P.dead&&Math.abs(P.y-b.y)<4)takeDamage(Math.round(T.dmg*dm),m.id,'z');
+      if(!P.dead&&Math.abs(P.y-b.y)<4)takeDamage(mobCap(Math.round(T.dmg*dm)),m.id,'z');
     }
   }
   // ----- 대마왕 -----
